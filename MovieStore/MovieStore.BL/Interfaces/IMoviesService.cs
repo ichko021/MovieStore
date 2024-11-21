@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MovieStore.Models.DTO;
 
 namespace MovieStore.BL.Interfaces
 {
-    internal class IMoviesService
+    public interface IMoviesService
     {
+        List<Movie> GetAll();
+        void AddMovie(Movie movie);
+        Movie UpdateMovie(int id, Movie movie);
+        void DeleteMovie(int id);
+        Movie GetMovieById(int id);
     }
 }
