@@ -1,7 +1,7 @@
+using Mapster;
+using MovieStore.BL;
 using MovieStore.BL.Interfaces;
-using MovieStore.BL.Services;
-using MovieStore.DL.Interfaces;
-using MovieStore.DL.Repositories;
+using MovieStore.DL;
 
 namespace MovieStore
 {
@@ -12,17 +12,29 @@ namespace MovieStore
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services
+                .RegisterRepositories()
+                .RegisterServices();
 
-            builder.Services.AddSingleton<IMoviesService, MoviesService>();
-            builder.Services.AddSingleton<IMovieRepository, MoviesStaticDataRepository>();
+            builder.Services.AddMapster();
 
             builder.Services.AddControllers();
 
+            builder.Services.AddSwaggerGen();
+
             var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
 
             // Configure the HTTP request pipeline.
 
             app.UseAuthorization();
+
 
             app.MapControllers();
 

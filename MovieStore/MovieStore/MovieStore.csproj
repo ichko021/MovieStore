@@ -7,8 +7,14 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MovieStore.BL\MovieStore.BL.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+	    <PackageReference Include="Mapster" Version="7.4.0" />
+	    <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
+	    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\MovieStore.BL\MovieStore.BL.csproj" />
+     </ItemGroup>
 
 </Project>

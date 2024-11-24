@@ -15,9 +15,9 @@ namespace MovieStore.BL.Services
             return _movieRepository.GetAll();
         }
 
-        public void AddMovie(Movie movie)
+        public void Add(Movie movie)
         {
-            _movieRepository.AddMovie(movie);
+            _movieRepository.Add(movie);
         }
 
         public Movie UpdateMovie(int id, Movie movie)
@@ -30,9 +30,9 @@ namespace MovieStore.BL.Services
             _movieRepository.DeleteMovie(id);
         }
 
-        public Movie GetMovieById(int id)
+        public Movie GetById(int id)
         {
-            return _movieRepository.GetMovieById(id);
+            return _movieRepository.GetById(id);
         }
     }
 }

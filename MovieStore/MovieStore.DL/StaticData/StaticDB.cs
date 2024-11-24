@@ -5,7 +5,6 @@ namespace MovieStore.DL.StaticData
     internal static class StaticDB
     {
 
-
         public static List<Movie> Movies { get; set; } = new List<Movie>() { 
             new Movie()
             {

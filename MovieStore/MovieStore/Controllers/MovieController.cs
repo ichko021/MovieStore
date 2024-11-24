@@ -1,7 +1,9 @@
+using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
 using MovieStore.BL.Interfaces;
+using MovieStore.BL.Services;
 using MovieStore.Models.DTO;
-using System;
+using MovieStore.Models.Requests;
 
 namespace MovieStore.Controllers
 {
@@ -11,60 +13,94 @@ namespace MovieStore.Controllers
     {
 
         private readonly IMoviesService _moviesService;
+        private readonly IMapper _mapper;
 
-        public MovieController(IMoviesService moviesService)
+        public MovieController(IMoviesService moviesService, IMapper mapper)
         {
             _moviesService = moviesService;
+            _mapper = mapper;
         }
 
-        [HttpGet("allMovies")]
+        [HttpGet("GetAll")]
         public List<Movie> Get()
         { 
             return _moviesService.GetAll();
         }
 
-        [HttpPost("addMovie")]
-        public void Add([FromBody] Movie movie)
+        [HttpPost("Add")]
+        public void Add([FromBody] AddMovieRequest movie)
         {
 
-            var requestBody = movie;
-            _moviesService.AddMovie(requestBody);
+            var movieDto = _mapper.Map<Movie>(movie);
+            movieDto.Id = _moviesService.GetAll().Count + 1;
+
+            _moviesService.Add(movieDto);
 
         }
 
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpDelete("Delete")]
+        public IActionResult Delete(int id)
         {
-            _moviesService.DeleteMovie(id);
-        }
-
-        [HttpPut("{id}")]
-        public ActionResult<Movie> Update(int id, Movie movie)
-        {
-
             if ((id - 1) < 0 || id > _moviesService.GetAll().Count)
             {
                 return NotFound($"No movie found at index {id}.");
             }
             else
             {
-                return _moviesService.UpdateMovie(id, movie);
+                _moviesService.DeleteMovie(id);
+                return Ok();
             }
             
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Movie> GetById(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpPut("UpdateById")]
+        public IActionResult Update(int id, [FromBody] AddMovieRequest movie)
         {
+
             if ((id - 1) < 0 || id > _moviesService.GetAll().Count)
             {
-                return NotFound($"No movie found at index {id}.");
-            } 
+                return BadRequest($"Wrond ID: {id}");
+            }
+
+            var movieDto = _mapper.Map<Movie>(movie);
+
+            var result = _moviesService.UpdateMovie(id, movieDto);
+
+            if (result == null)
+            {
+                return NotFound($"Movie with ID:{id} not found");
+            }
+
             else
             {
-                return _moviesService.GetMovieById(id);
+                return Ok();
             }
-            
+
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpGet("GetById")]
+        public IActionResult GetById(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest($"Wrond ID: {id}");
+            }
+
+            var result = _moviesService.GetById(id);
+
+            if (result == null)
+            {
+                return NotFound($"Movie with ID:{id} not found");
+            }
+
+            return Ok(result);
+
         }
     }
 }

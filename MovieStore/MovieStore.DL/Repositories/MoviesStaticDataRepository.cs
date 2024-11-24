@@ -11,25 +11,32 @@ namespace MovieStore.DL.Repositories
             return StaticDB.Movies;
         }
 
-        public void AddMovie(Movie movie)
+        public void Add(Movie movie)
         {
             StaticDB.Movies.Add(movie);
         }
 
-        public Movie UpdateMovie(int id, Movie movie)
+        public Movie? UpdateMovie(int id, Movie movie)
         {
+            if (id <= 0 || id > StaticDB.Movies.Count) return null;
             StaticDB.Movies[id - 1] = movie;
             return StaticDB.Movies[id - 1];
         }
 
         public void DeleteMovie(int id)
         {
+            for (int i = id - 1; i < StaticDB.Movies.Count; i++)
+            {
+                StaticDB.Movies[i].Id -= 1;
+            }
+
             StaticDB.Movies.RemoveAt(id - 1);
         }
 
-        public Movie GetMovieById(int id)
+        public Movie? GetById(int id)
         {
-            return StaticDB.Movies[id - 1];
+            if (id <= 0 || id > StaticDB.Movies.Count) return null;
+            return StaticDB.Movies[id-1];
         }
     }
 }
