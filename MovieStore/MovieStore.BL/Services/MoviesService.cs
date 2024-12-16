@@ -4,7 +4,7 @@ using MovieStore.Models.DTO;
 
 namespace MovieStore.BL.Services
 {
-    public class MoviesService : IMoviesService
+    internal class MoviesService : IMoviesService
     {
         private readonly IMovieRepository _movieRepository;
 
@@ -20,18 +20,20 @@ namespace MovieStore.BL.Services
             _movieRepository.Add(movie);
         }
 
-        public Movie UpdateMovie(int id, Movie movie)
-        {
-            return _movieRepository.UpdateMovie(id, movie);
-        }
+        //public Movie UpdateMovie(int id, Movie movie)
+        //{
+        //    return _movieRepository.UpdateMovie(id, movie);
+        //}
 
-        public void DeleteMovie(int id)
-        {
-            _movieRepository.DeleteMovie(id);
-        }
+        //public void DeleteMovie(int id)
+        //{
+        //    _movieRepository.DeleteMovie(id);
+        //}
 
-        public Movie GetById(int id)
+        public Movie? GetById(string id)
         {
+            if (string.IsNullOrEmpty(id)) return null;
+
             return _movieRepository.GetById(id);
         }
     }
