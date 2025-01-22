@@ -2,7 +2,7 @@
 
 namespace MovieStore.BL.Interfaces
 {
-    public interface IMoviesService
+    public interface IMovieService
     {
         List<Movie> GetAll();
         void Add(Movie movie);

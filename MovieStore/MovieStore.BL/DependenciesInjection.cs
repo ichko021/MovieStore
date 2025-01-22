@@ -1,19 +1,26 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using MovieStore.DL.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 using MovieStore.BL.Interfaces;
 using MovieStore.BL.Services;
+using MovieStore.DL;
 
 namespace MovieStore.BL
 {
-    public static class DependenciesInjection
+    public static class DependencyInjection
     {
-        public static IServiceCollection
-            RegisterServices(this IServiceCollection services)
+        public static IServiceCollection RegisterBusinessLayer(this IServiceCollection services)
         {
-            return services
-                        .AddSingleton<IMoviesService, MoviesService>()
-                        .AddSingleton<IBusinessService, BusinessService>();
+            services.AddSingleton<IMovieService, MovieService>();
+            services.AddSingleton<IMovieBlService, MovieBlService>();
+            services.AddSingleton<IActorService, ActorService>();
+
+            return services;
+        }
+
+        public static IServiceCollection RegisterDataLayer(this IServiceCollection services)
+        {
+            services.RegisterRepositories();
+
+            return services;
         }
     }
 }

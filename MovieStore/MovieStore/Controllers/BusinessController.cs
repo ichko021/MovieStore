@@ -1,50 +1,46 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MovieStore.BL.Interfaces;
 using MovieStore.Models.DTO;
-using MovieStore.Models.Requests;
 
 namespace MovieStore.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class BusinessController : ControllerBase
     {
-        private readonly IBusinessService _movieService;
+        private readonly IMovieBlService _movieService;
+        private readonly IActorService _actorService;
 
-        public BusinessController(IBusinessService movieService)
-
+        public BusinessController(IMovieBlService movieService, IActorService actorService)
         {
             _movieService = movieService;
+            _actorService = actorService;
         }
 
-        [HttpGet("GetAllDetailedMovies")]
-        public IActionResult GetAllDetailedMovies()
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpGet("GetAllMovieWithDetails")]
+        public IActionResult GetAllMovieWithDetails()
         {
-            var result =
-                _movieService.GetAllMovies();
+            var result = _movieService.GetDetailedMovies();
 
-            if (result != null && result.Count > 0)
+            if (result == null || result.Count == 0)
             {
-                return Ok(result);
+                return NotFound("No movies found");
             }
 
-            return NotFound();
+            return Ok(result);
         }
 
-        [HttpPost("Test")]
-        public IActionResult Test([FromBody] TestRequest movie)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpPost("AddActor")]
+        public IActionResult AddActor([FromBody] Actor actor)
         {
+            _actorService.Add(actor);
 
             return Ok();
         }
-    }
 
-    public class TestRequest
-    {
-        public int MagicNumber { get; set; }
-
-        public string Text { get; set; }
-
-        public DateTime DateTime { get; set; }
     }
 }

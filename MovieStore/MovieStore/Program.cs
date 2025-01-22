@@ -1,16 +1,15 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
-using MovieStore.DL;
-using MovieStore.Models.Configurations;
-using MovieStore.Validators;
 using MovieStore.BL;
-using MovieStore.BL.Interfaces;
-using MovieStore.DL;
-using MovieStore.Models.Configurations;
+using MovieStore.HealthChecks;
+using MovieStore.MapConfig;
+using MovieStore.ServiceExtensions;
 using MovieStore.Validators;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 
-namespace MovieStoreC
+namespace MovieStore
 {
     public class Program
     {
@@ -18,27 +17,40 @@ namespace MovieStoreC
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            //Add configurations
-            builder.Services.Configure<MongoDbConfiguration>(
-                builder.Configuration
-                    .GetSection(nameof(MongoDbConfiguration)));
+            var logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console(theme:
+                    AnsiConsoleTheme.Code)
+                .CreateLogger();
+
+            builder.Logging.AddSerilog(logger);
 
             // Add services to the container.
             builder.Services
-                .RegisterRepositories()
-                .RegisterServices();
+                .AddConfigurations(builder.Configuration)
+                .RegisterDataLayer()
+                .RegisterBusinessLayer();
 
+            MapsterConfiguration.Configure();
             builder.Services.AddMapster();
 
-            builder.Services.AddControllers();
 
             builder.Services
-                .AddValidatorsFromAssemblyContaining<TestValidator>();
+                .AddValidatorsFromAssemblyContaining<AddMovieRequestValidator>();
             builder.Services.AddFluentValidationAutoValidation();
 
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            //builder.Services.AddHealthChecks();
+
+            builder.Services.AddHealthChecks()
+                .AddCheck<SampleHealthCheck>("Sample");
+
             var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
 
             if (app.Environment.IsDevelopment())
             {
@@ -46,11 +58,11 @@ namespace MovieStoreC
                 app.UseSwaggerUI();
             }
 
+            app.MapHealthChecks("/Sample");
 
-            // Configure the HTTP request pipeline.
+            app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

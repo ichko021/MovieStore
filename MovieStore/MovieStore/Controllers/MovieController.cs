@@ -7,98 +7,50 @@ using MovieStore.Models.Requests;
 namespace MovieStore.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class MovieController : ControllerBase
+    [Route("[controller]")]
+    public class MoviesController : ControllerBase
     {
-
-        private readonly IMoviesService _moviesService;
+        private readonly IMovieService _movieService;
         private readonly IMapper _mapper;
+        private readonly ILogger<MoviesController> _logger;
 
-        public MovieController(IMoviesService moviesService, IMapper mapper)
+        public MoviesController(
+            IMovieService movieService,
+            IMapper mapper,
+            ILogger<MoviesController> logger)
         {
-            _moviesService = moviesService;
+            _movieService = movieService;
             _mapper = mapper;
+            _logger = logger;
         }
 
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet("GetAll")]
         public IActionResult Get()
         {
-            var result = _moviesService.GetAll();
+            var result = _movieService.GetAll();
 
-            if (result != null && result.Count > 0)
+            if (result == null || result.Count == 0)
             {
-                return Ok(result);
+                return NotFound("No movies found");
             }
 
-            return NotFound();
+            return Ok(result);
         }
 
-        [HttpPost("Add")]
-        public IActionResult Add([FromBody] AddMovieRequest movie)
-        {
-
-            var movieDto = _mapper.Map<Movie>(movie);
-
-            _moviesService.Add(movieDto);
-
-            return Ok();
-        }
-
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[HttpDelete("Delete")]
-        //public IActionResult Delete(int id)
-        //{
-        //    if ((id - 1) < 0 || id > _moviesService.GetAll().Count)
-        //    {
-        //        return NotFound($"No movie found at index {id}.");
-        //    }
-        //    else
-        //    {
-        //        _moviesService.DeleteMovie(id);
-        //        return Ok();
-        //    }
-            
-        //}
-
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[HttpPut("UpdateById")]
-        //public IActionResult Update(int id, [FromBody] AddMovieRequest movie)
-        //{
-
-        //    if ((id - 1) < 0 || id > _moviesService.GetAll().Count)
-        //    {
-        //        return BadRequest($"Wrond ID: {id}");
-        //    }
-
-        //    var movieDto = _mapper.Map<Movie>(movie);
-
-        //    var result = _moviesService.UpdateMovie(id, movieDto);
-
-        //    if (result == null)
-        //    {
-        //        return NotFound($"Movie with ID:{id} not found");
-        //    }
-
-        //    else
-        //    {
-        //        return Ok();
-        //    }
-
-        //}
-
+        [HttpGet("GetById")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpGet("GetById")]
-        public IActionResult GetById(String id)
+        public IActionResult GetById(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return BadRequest($"Wrong ID:{id}");
+                return BadRequest("Id can't be null or empty");
             }
 
-            var result = _moviesService.GetById(id);
+            var result = _movieService.GetById(id);
 
             if (result == null)
             {
@@ -106,7 +58,43 @@ namespace MovieStore.Controllers
             }
 
             return Ok(result);
+        }
 
+        [HttpPost("Add")]
+        public IActionResult Add(AddMovieRequest movie)
+        {
+            try
+            {
+                var movieDto = _mapper.Map<Movie>(movie);
+
+                if (movieDto == null)
+                {
+                    return BadRequest("Can't convert movie to movie DTO");
+                }
+
+                _movieService.Add(movieDto);
+
+                return Ok();
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, $"Error adding movie with");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("Delete")]
+        public IActionResult Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Id must be greater than 0");
+            }
+
+            //_movieService.Delete(id);
+
+
+            return Ok();
         }
     }
 }

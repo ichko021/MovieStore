@@ -1,21 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MovieStore.DL.Interfaces;
-using MovieStore.DL.Repositories.MongoDb;
 using MovieStore.DL.Repositories;
+using MovieStore.DL.Repositories.MongoRepositories;
 
 namespace MovieStore.DL
 {
-    public static class DependenciesInjection
+    public static class DependencyInjection
     {
-        public static IServiceCollection
-            RegisterRepositories(this IServiceCollection services)
+        public static void RegisterRepositories(this IServiceCollection services)
         {
-            return
-                services
-                    .AddSingleton<IMovieRepository,
-                        MoviesMongoRepository>()
-                    .AddSingleton<IActorRepository,
-                        ActorStaticDataRepository>();
+            services
+                .AddSingleton<IMovieRepository, MovieRepository>()
+                .AddSingleton<IActorRepository, ActorRepository>();
         }
     }
 }

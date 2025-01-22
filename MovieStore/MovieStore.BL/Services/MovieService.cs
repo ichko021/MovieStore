@@ -4,11 +4,15 @@ using MovieStore.Models.DTO;
 
 namespace MovieStore.BL.Services
 {
-    internal class MoviesService : IMoviesService
+    public class MovieService : IMovieService
     {
         private readonly IMovieRepository _movieRepository;
-
-        public MoviesService(IMovieRepository movieRepository) { _movieRepository = movieRepository; }
+        private readonly IActorRepository _actorRepository;
+        public MovieService(IMovieRepository movieRepository, IActorRepository actorRepository) 
+        { 
+            _movieRepository = movieRepository; 
+            _actorRepository = actorRepository; 
+        }
 
         public List<Movie> GetAll()
         {
@@ -17,6 +21,19 @@ namespace MovieStore.BL.Services
 
         public void Add(Movie movie)
         {
+            if (movie is null) return;
+
+            foreach (var movieActor in movie.Actors)
+            {
+                var actor = _actorRepository.GetById(movieActor);
+
+                if (actor is null)
+                {
+                    throw new Exception(
+                        $"Actor with id {movieActor} does not exist");
+                }
+            }
+
             _movieRepository.Add(movie);
         }
 
